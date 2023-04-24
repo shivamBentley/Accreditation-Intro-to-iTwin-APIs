@@ -6,7 +6,7 @@
 import "./App.scss";
 
 import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
-import type { ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { FitViewTool, IModelApp, StandardViewId } from "@itwin/core-frontend";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
@@ -33,6 +33,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { history } from "./history";
+import { Visualization } from "./Visualization";
 
 const App: React.FC = () => {
   const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
@@ -142,6 +143,24 @@ const App: React.FC = () => {
     await MeasureTools.startup();
   }, []);
 
+  const onIModelConnected = (_imodel: IModelConnection) => {
+
+    IModelApp.viewManager.onViewOpen.addOnce(async (vp: ScreenViewport) => {
+
+      // const viewStyle: DisplayStyleSettingsProps = {
+      //   viewflags: {
+      //     visEdges: false,
+      //     shadows: true
+      //   }
+      // }
+      // vp.overrideDisplayStyle(viewStyle);
+
+      Visualization.hideHouseExterior(vp);
+
+    })
+  }
+
+
   return (
     <div className="viewer-container">
       {!accessToken && (
@@ -171,7 +190,10 @@ const App: React.FC = () => {
             enableCopyingPropertyText: true,
           }),
           new MeasureToolsUiItemsProvider(),
+
         ]}
+        onIModelConnected={onIModelConnected}
+
       />
     </div>
   );
